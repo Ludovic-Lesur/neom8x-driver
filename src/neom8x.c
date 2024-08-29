@@ -10,6 +10,7 @@
 #ifndef NEOM8X_DRIVER_DISABLE_FLAGS_FILE
 #include "neom8x_driver_flags.h"
 #endif
+#include "error.h"
 #include "neom8x_hw.h"
 #include "string.h"
 #include "types.h"

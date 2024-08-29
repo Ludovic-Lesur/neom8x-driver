@@ -225,12 +225,12 @@ NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* configura
 #endif
 
 /*******************************************************************/
-#define NEOM8X_exit_error(base) { if (neom8x_status != NEOM8X_SUCCESS) { status = (base + neom8x_status); goto errors; } }
+#define NEOM8X_exit_error(base) { ERROR_check_exit(neom8x_status, NEOM8X_SUCCESS, base) }
 
 /*******************************************************************/
-#define NEOM8X_stack_error(base) { if (neom8x_status != NEOM8X_SUCCESS) { ERROR_stack_add(base + neom8x_status); } }
+#define NEOM8X_stack_error(base) { ERROR_check_stack(neom8x_status, NEOM8X_SUCCESS, base) }
 
 /*******************************************************************/
-#define NEOM8X_stack_exit_error(base, code) { if (neom8x_status != NEOM8X_SUCCESS) { ERROR_stack_add(base + neom8x_status); status = code; goto errors; } }
+#define NEOM8X_stack_exit_error(base, code) { ERROR_check_stack_exit(neom8x_status, NEOM8X_SUCCESS, base, code) }
 
 #endif /* __NEOM8X_H__ */

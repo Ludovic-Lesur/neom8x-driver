@@ -7,6 +7,7 @@
 
 #include "neom8x_hw.h"
 
+#include "neom8x.h"
 #include "types.h"
 
 /*** NEOM8X HW functions ***/
