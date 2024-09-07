@@ -11,6 +11,7 @@
 #include "neom8x_driver_flags.h"
 #endif
 #include "error.h"
+#include "math.h"
 #include "neom8x_hw.h"
 #include "string.h"
 #include "types.h"
@@ -887,17 +888,17 @@ NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* timepulse
 		goto errors;
 	}
 	// Frequency
-	neom8x_cfg_tp5[14] = (uint8_t) (((timepulse_config -> frequency_hz) >> 0)  & 0xFF);
-	neom8x_cfg_tp5[15] = (uint8_t) (((timepulse_config -> frequency_hz) >> 8)  & 0xFF);
-	neom8x_cfg_tp5[16] = (uint8_t) (((timepulse_config -> frequency_hz) >> 16) & 0xFF);
-	neom8x_cfg_tp5[17] = (uint8_t) (((timepulse_config -> frequency_hz) >> 24) & 0xFF);
+	neom8x_cfg_tp5[14] = (uint8_t) (((timepulse_config -> frequency_hz) >> 0)  & MATH_U8_MASK);
+	neom8x_cfg_tp5[15] = (uint8_t) (((timepulse_config -> frequency_hz) >> 8)  & MATH_U8_MASK);
+	neom8x_cfg_tp5[16] = (uint8_t) (((timepulse_config -> frequency_hz) >> 16) & MATH_U8_MASK);
+	neom8x_cfg_tp5[17] = (uint8_t) (((timepulse_config -> frequency_hz) >> 24) & MATH_U8_MASK);
 	// Pulse length radio.
-	pulse_length_ratio = ((uint64_t) (timepulse_config -> duty_cycle_percent)) * ((uint64_t) (0xFFFFFFFF));
+	pulse_length_ratio = ((uint64_t) (timepulse_config -> duty_cycle_percent)) * ((uint64_t) (MATH_U32_MAX));
 	pulse_length_ratio /= 100;
-	neom8x_cfg_tp5[22] = (uint8_t) ((pulse_length_ratio >> 0)  & 0xFF);
-	neom8x_cfg_tp5[23] = (uint8_t) ((pulse_length_ratio >> 8)  & 0xFF);
-	neom8x_cfg_tp5[24] = (uint8_t) ((pulse_length_ratio >> 16) & 0xFF);
-	neom8x_cfg_tp5[25] = (uint8_t) ((pulse_length_ratio >> 24) & 0xFF);
+	neom8x_cfg_tp5[22] = (uint8_t) ((pulse_length_ratio >> 0)  & MATH_U8_MASK);
+	neom8x_cfg_tp5[23] = (uint8_t) ((pulse_length_ratio >> 8)  & MATH_U8_MASK);
+	neom8x_cfg_tp5[24] = (uint8_t) ((pulse_length_ratio >> 16) & MATH_U8_MASK);
+	neom8x_cfg_tp5[25] = (uint8_t) ((pulse_length_ratio >> 24) & MATH_U8_MASK);
 	// Flags.
 	neom8x_cfg_tp5[34] = ((timepulse_config -> active) == 0) ? 0x4A : 0x4B;
 	// Compute checksum.

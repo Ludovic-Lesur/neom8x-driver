@@ -6,6 +6,7 @@ This repository contains the **NEO-M8x** GPS module driver (based on the UART in
 
 The driver relies on:
 
+* An external `types.h` header file defining the **standard C types** of the targeted MCU.
 * The **embedded utility functions** defined in the [embedded-utils](https://github.com/Ludovic-Lesur/embedded-utils) repository.
 
 Here is the versions compatibility table:
