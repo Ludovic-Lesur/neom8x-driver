@@ -84,8 +84,8 @@ typedef void (*NEOM8X_completion_cb_t)(NEOM8X_acquisition_status_t acquisition_s
  *******************************************************************/
 typedef struct {
 	NEOM8X_gps_data_t gps_data;
-	NEOM8X_process_cb_t process_cb;
-	NEOM8X_completion_cb_t completion_cb;
+	NEOM8X_process_cb_t process_callback;
+	NEOM8X_completion_cb_t completion_callback;
 #if ((defined NEOM8X_DRIVER_GPS_DATA_POSITION) && (NEOM8X_DRIVER_ALTITUDE_STABILITY_FILTER_MODE == 2))
 	uint8_t altitude_stability_threshold;
 #endif

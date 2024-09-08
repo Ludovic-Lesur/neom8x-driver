@@ -166,8 +166,8 @@ static void _NEOM8X_rx_irq_callback(uint8_t message_byte) {
 		neom8x_ctx.nmea_buffer_idx_write = (neom8x_ctx.nmea_buffer_idx_write + 1) % NEOM8X_NMEA_RX_BUFFER_DEPTH;
 		neom8x_ctx.nmea_char_idx = 0;
 		// Ask for processing.
-		if ((message_byte == NEOM8X_NMEA_CHAR_END) && (neom8x_ctx.acquisition.process_cb != NULL)) {
-			neom8x_ctx.acquisition.process_cb();
+		if ((message_byte == NEOM8X_NMEA_CHAR_END) && (neom8x_ctx.acquisition.process_callback != NULL)) {
+			neom8x_ctx.acquisition.process_callback();
 		}
 	}
 }
@@ -641,8 +641,8 @@ NEOM8X_status_t NEOM8X_init(void) {
 	neom8x_ctx.nmea_buffer_idx_ready = 0;
 	neom8x_ctx.nmea_frame_received_flag = 0;
 	neom8x_ctx.acquisition.gps_data = NEOM8X_GPS_DATA_LAST;
-	neom8x_ctx.acquisition.process_cb = NULL;
-	neom8x_ctx.acquisition.completion_cb = NULL;
+	neom8x_ctx.acquisition.process_callback = NULL;
+	neom8x_ctx.acquisition.completion_callback = NULL;
 	// Init hardware interface.
 	hw_config.uart_baud_rate = NEOM8X_UART_BAUD_RATE;
 	hw_config.rx_irq_callback = &_NEOM8X_rx_irq_callback;
@@ -683,14 +683,14 @@ NEOM8X_status_t NEOM8X_start_acquisition(NEOM8X_acquisition_t* acquisition) {
 		status = NEOM8X_ERROR_NULL_PARAMETER;
 		goto errors;
 	}
-	if (((acquisition -> process_cb) == NULL) || ((acquisition -> completion_cb) == NULL)) {
+	if (((acquisition -> process_callback) == NULL) || ((acquisition -> completion_callback) == NULL)) {
 		status = NEOM8X_ERROR_NULL_PARAMETER;
 		goto errors;
 	}
 	// Copy acquisition parameters locally.
 	neom8x_ctx.acquisition.gps_data = (acquisition -> gps_data);
-	neom8x_ctx.acquisition.completion_cb = (acquisition -> completion_cb);
-	neom8x_ctx.acquisition.process_cb = (acquisition -> process_cb);
+	neom8x_ctx.acquisition.completion_callback = (acquisition -> completion_callback);
+	neom8x_ctx.acquisition.process_callback = (acquisition -> process_callback);
 #if ((defined NEOM8X_DRIVER_GPS_DATA_POSITION) && (NEOM8X_DRIVER_ALTITUDE_STABILITY_FILTER_MODE == 2))
 	neom8x_ctx.acquisition.altitude_stability_threshold = (acquisition -> altitude_stability_threshold);
 #endif
@@ -813,7 +813,7 @@ NEOM8X_status_t NEOM8X_process(void) {
 	}
 	// Call callback in case of success.
 	if (acquisition_status != NEOM8X_ACQUISITION_STATUS_FAIL) {
-		neom8x_ctx.acquisition.completion_cb(acquisition_status);
+		neom8x_ctx.acquisition.completion_callback(acquisition_status);
 	}
 errors:
 	return status;
