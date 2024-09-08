@@ -37,6 +37,8 @@ typedef enum {
 	NEOM8X_ERROR_BASE_LAST = (NEOM8X_ERROR_BASE_STRING + STRING_ERROR_BASE_LAST)
 } NEOM8X_status_t;
 
+#ifndef NEOM8X_DRIVER_DISABLE
+
 /*!******************************************************************
  * \enum NEOM8X_acquisition_status_t
  * \brief NEOM8X GPS acquisition result.
@@ -232,5 +234,7 @@ NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* configura
 
 /*******************************************************************/
 #define NEOM8X_stack_exit_error(base, code) { ERROR_check_stack_exit(neom8x_status, NEOM8X_SUCCESS, base, code) }
+
+#endif /* NEOM8X_DRIVER_DISABLE */
 
 #endif /* __NEOM8X_H__ */

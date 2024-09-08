@@ -22,6 +22,7 @@ Here is the versions compatibility table:
 | **Flag name** | **Value** | **Description** |
 |:---:|:---:|:---:|
 | `NEOM8X_DRIVER_DISABLE_FLAGS_FILE` | `defined` / `undefined` | Disable the `neom8x_driver_flags.h` header file inclusion when compilation flags are given in the project settings or by command line. |
+| `NEOM8X_DRIVER_DISABLE` | `defined` / `undefined` | Disable the NEOM8x driver. |
 | `NEOM8X_DRIVER_GPIO_ERROR_BASE_LAST` | `<value>` | Last error base of the low level GPIO driver. |
 | `NEOM8X_DRIVER_UART_ERROR_BASE_LAST` | `<value>` | Last error base of the low level UART driver. |
 | `NEOM8X_DRIVER_DELAY_ERROR_BASE_LAST` | `<value>` | Last error base of the low level delay driver. |

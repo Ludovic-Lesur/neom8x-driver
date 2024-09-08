@@ -16,6 +16,8 @@
 #include "string.h"
 #include "types.h"
 
+#ifndef NEOM8X_DRIVER_DISABLE
+
 /*** NEOM8X local macros ***/
 
 #define NEOM8X_UART_BAUD_RATE					9600
@@ -910,3 +912,5 @@ errors:
 	return status;
 }
 #endif
+
+#endif /* NEOM8X_DRIVER_DISABLE */

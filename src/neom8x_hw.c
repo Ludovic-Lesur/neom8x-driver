@@ -7,8 +7,13 @@
 
 #include "neom8x_hw.h"
 
+#ifndef NEOM8X_DRIVER_DISABLE_FLAGS_FILE
+#include "neom8x_driver_flags.h"
+#endif
 #include "neom8x.h"
 #include "types.h"
+
+#ifndef NEOM8X_DRIVER_DISABLE
 
 /*** NEOM8X HW functions ***/
 
@@ -74,3 +79,5 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_set_backup_voltage(uint8_t state
 	return status;
 }
 #endif
+
+#endif /* NEOM8X_DRIVER_DISABLE */
