@@ -21,20 +21,20 @@
  * \brief NEOM8X driver error codes.
  *******************************************************************/
 typedef enum {
-	// Driver errors.
-	NEOM8X_SUCCESS = 0,
-	NEOM8X_ERROR_NULL_PARAMETER,
-	NEOM8X_ERROR_ACQUISITION_DATA,
-	NEOM8X_ERROR_ACQUISITION_RUNNING,
-	NEOM8X_ERROR_TIMEPULSE_FREQUENCY,
-	NEOM8X_ERROR_TIMEPULSE_DUTY_CYCLE,
-	// Low level drivers errors.
-	NEOM8X_ERROR_BASE_GPIO = 0x0100,
-	NEOM8X_ERROR_BASE_UART = (NEOM8X_ERROR_BASE_GPIO + NEOM8X_DRIVER_GPIO_ERROR_BASE_LAST),
-	NEOM8X_ERROR_BASE_DELAY = (NEOM8X_ERROR_BASE_UART + NEOM8X_DRIVER_UART_ERROR_BASE_LAST),
-	NEOM8X_ERROR_BASE_STRING = (NEOM8X_ERROR_BASE_DELAY + NEOM8X_DRIVER_DELAY_ERROR_BASE_LAST),
-	// Last base value.
-	NEOM8X_ERROR_BASE_LAST = (NEOM8X_ERROR_BASE_STRING + STRING_ERROR_BASE_LAST)
+    // Driver errors.
+    NEOM8X_SUCCESS = 0,
+    NEOM8X_ERROR_NULL_PARAMETER,
+    NEOM8X_ERROR_ACQUISITION_DATA,
+    NEOM8X_ERROR_ACQUISITION_RUNNING,
+    NEOM8X_ERROR_TIMEPULSE_FREQUENCY,
+    NEOM8X_ERROR_TIMEPULSE_DUTY_CYCLE,
+    // Low level drivers errors.
+    NEOM8X_ERROR_BASE_GPIO = 0x0100,
+    NEOM8X_ERROR_BASE_UART = (NEOM8X_ERROR_BASE_GPIO + NEOM8X_DRIVER_GPIO_ERROR_BASE_LAST),
+    NEOM8X_ERROR_BASE_DELAY = (NEOM8X_ERROR_BASE_UART + NEOM8X_DRIVER_UART_ERROR_BASE_LAST),
+    NEOM8X_ERROR_BASE_STRING = (NEOM8X_ERROR_BASE_DELAY + NEOM8X_DRIVER_DELAY_ERROR_BASE_LAST),
+    // Last base value.
+    NEOM8X_ERROR_BASE_LAST = (NEOM8X_ERROR_BASE_STRING + STRING_ERROR_BASE_LAST)
 } NEOM8X_status_t;
 
 #ifndef NEOM8X_DRIVER_DISABLE
@@ -44,12 +44,12 @@ typedef enum {
  * \brief NEOM8X GPS acquisition result.
  *******************************************************************/
 typedef enum {
-	NEOM8X_ACQUISITION_STATUS_FAIL = 0,
-	NEOM8X_ACQUISITION_STATUS_FOUND,
+    NEOM8X_ACQUISITION_STATUS_FAIL = 0,
+    NEOM8X_ACQUISITION_STATUS_FOUND,
 #if (NEOM8X_DRIVER_ALTITUDE_STABILITY_FILTER_MODE > 0)
-	NEOM8X_ACQUISITION_STATUS_STABLE,
+    NEOM8X_ACQUISITION_STATUS_STABLE,
 #endif
-	NEOM8X_ACQUISITION_STATUS_LAST
+    NEOM8X_ACQUISITION_STATUS_LAST
 } NEOM8X_acquisition_status_t;
 
 /*!******************************************************************
@@ -58,12 +58,12 @@ typedef enum {
  *******************************************************************/
 typedef enum {
 #ifdef NEOM8X_DRIVER_GPS_DATA_TIME
-	NEOM8X_GPS_DATA_TIME,
+    NEOM8X_GPS_DATA_TIME,
 #endif
 #ifdef NEOM8X_DRIVER_GPS_DATA_POSITION
-	NEOM8X_GPS_DATA_POSITION,
+    NEOM8X_GPS_DATA_POSITION,
 #endif
-	NEOM8X_GPS_DATA_LAST
+    NEOM8X_GPS_DATA_LAST
 } NEOM8X_gps_data_t;
 
 /*!******************************************************************
@@ -83,11 +83,11 @@ typedef void (*NEOM8X_completion_cb_t)(NEOM8X_acquisition_status_t acquisition_s
  * \brief NEOM8X acquisition parameters.
  *******************************************************************/
 typedef struct {
-	NEOM8X_gps_data_t gps_data;
-	NEOM8X_process_cb_t process_callback;
-	NEOM8X_completion_cb_t completion_callback;
+    NEOM8X_gps_data_t gps_data;
+    NEOM8X_process_cb_t process_callback;
+    NEOM8X_completion_cb_t completion_callback;
 #if ((defined NEOM8X_DRIVER_GPS_DATA_POSITION) && (NEOM8X_DRIVER_ALTITUDE_STABILITY_FILTER_MODE == 2))
-	uint8_t altitude_stability_threshold;
+    uint8_t altitude_stability_threshold;
 #endif
 } NEOM8X_acquisition_t;
 
@@ -96,14 +96,14 @@ typedef struct {
  * \brief GPS time structure.
  *******************************************************************/
 typedef struct {
-	// Date.
-	uint16_t year;
-	uint8_t month;
-	uint8_t date;
-	// Time.
-	uint8_t hours;
-	uint8_t minutes;
-	uint8_t seconds;
+    // Date.
+    uint16_t year;
+    uint8_t month;
+    uint8_t date;
+    // Time.
+    uint8_t hours;
+    uint8_t minutes;
+    uint8_t seconds;
 } NEOM8X_time_t;
 
 /*!******************************************************************
@@ -111,18 +111,18 @@ typedef struct {
  * \brief GPS position data. Note: seconds are expressed in (fractional part of minutes * 100000).
  *******************************************************************/
 typedef struct {
-	// Latitude.
-	uint8_t lat_degrees;
-	uint8_t lat_minutes;
-	uint32_t lat_seconds;
-	uint8_t lat_north_flag;
-	// Longitude.
-	uint8_t long_degrees;
-	uint8_t long_minutes;
-	uint32_t long_seconds;
-	uint8_t long_east_flag;
-	// Altitude.
-	uint32_t altitude;
+    // Latitude.
+    uint8_t lat_degrees;
+    uint8_t lat_minutes;
+    uint32_t lat_seconds;
+    uint8_t lat_north_flag;
+    // Longitude.
+    uint8_t long_degrees;
+    uint8_t long_minutes;
+    uint32_t long_seconds;
+    uint8_t long_east_flag;
+    // Altitude.
+    uint32_t altitude;
 } NEOM8X_position_t;
 
 /*!******************************************************************
@@ -130,9 +130,9 @@ typedef struct {
  * \brief Timepulse signal parameters.
  *******************************************************************/
 typedef struct {
-	uint8_t active;
-	uint32_t frequency_hz;
-	uint8_t duty_cycle_percent;
+    uint8_t active;
+    uint32_t frequency_hz;
+    uint8_t duty_cycle_percent;
 } NEOM8X_timepulse_configuration_t;
 
 /*** NEOM8X functions ***/
@@ -140,45 +140,45 @@ typedef struct {
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_init(void)
  * \brief Init NEOM8X driver.
- * \param[in]  	none
- * \param[out] 	none
- * \retval		Function execution status.
+ * \param[in]   none
+ * \param[out]  none
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_init(void);
 
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_de_init(void)
  * \brief Release NEOM8X driver.
- * \param[in]  	none
- * \param[out] 	none
- * \retval		Function execution status.
+ * \param[in]   none
+ * \param[out]  none
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_de_init(void);
 
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_start_acquisition(NEOM8X_acquisition_t* acquisition)
  * \brief Start GPS acquisition.
- * \param[in]  	acquisition: Pointer to the GPS acquisition parameters.
- * \param[out] 	none
- * \retval		Function execution status.
+ * \param[in]   acquisition: Pointer to the GPS acquisition parameters.
+ * \param[out]  none
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_start_acquisition(NEOM8X_acquisition_t* acquisition);
 
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_stop_acquisition(void)
  * \brief Stop GPS acquisition.
- * \param[in]  	none
- * \param[out] 	none
- * \retval		Function execution status.
+ * \param[in]   none
+ * \param[out]  none
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_stop_acquisition(void);
 
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_process(void)
  * \brief NEOM8X driver process function.
- * \param[in]  	none
- * \param[out] 	none
- * \retval		Function execution status.
+ * \param[in]   none
+ * \param[out]  none
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_process(void);
 
@@ -186,9 +186,9 @@ NEOM8X_status_t NEOM8X_process(void);
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_get_time(NEOM8X_time_t* gps_time)
  * \brief Read GPS time data of last acquisition.
- * \param[in]	none
- * \param[out] 	gps_time: Pointer to the last GPS time data.
- * \retval		Function execution status.
+ * \param[in]   none
+ * \param[out]  gps_time: Pointer to the last GPS time data.
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_get_time(NEOM8X_time_t* gps_time);
 #endif
@@ -197,9 +197,9 @@ NEOM8X_status_t NEOM8X_get_time(NEOM8X_time_t* gps_time);
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_get_position(NEOM8X_position_t* gps_position)
  * \brief Read GPS position data of last acquisition.
- * \param[in]  	none
- * \param[out]	gps_position: Pointer to the last GPS position data.
- * \retval		Function execution status.
+ * \param[in]   none
+ * \param[out]  gps_position: Pointer to the last GPS position data.
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_get_position(NEOM8X_position_t* gps_position);
 #endif
@@ -208,9 +208,9 @@ NEOM8X_status_t NEOM8X_get_position(NEOM8X_position_t* gps_position);
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_set_backup_voltage(uint8_t state)
  * \brief Set GPS backup voltage state.
- * \param[in]  	state: 0 to turn off, turn on otherwise.
- * \param[out]	none
- * \retval		Function execution status.
+ * \param[in]   state: 0 to turn off, turn on otherwise.
+ * \param[out]  none
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_set_backup_voltage(uint8_t state);
 #endif
@@ -219,9 +219,9 @@ NEOM8X_status_t NEOM8X_set_backup_voltage(uint8_t state);
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* configuration)
  * \brief Configure GPS timepulse output.
- * \param[in]  	configuration: Pointer to the timepulse signal parameters.
- * \param[out] 	none
- * \retval		Function execution status.
+ * \param[in]   configuration: Pointer to the timepulse signal parameters.
+ * \param[out]  none
+ * \retval      Function execution status.
  *******************************************************************/
 NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* configuration);
 #endif
