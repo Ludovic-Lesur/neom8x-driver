@@ -325,7 +325,7 @@ static NEOM8X_status_t _NEOM8X_get_nmea_checksum(char_t* nmea_rx_buf, uint8_t* c
     }
     if (checksum_start_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE) goto errors;
     // Convert hexadecimal to value.
-    string_status = STRING_string_to_value(&(nmea_rx_buf[checksum_start_char_idx + 1]), STRING_FORMAT_HEXADECIMAL, 2, &ck_value);
+    string_status = STRING_string_to_integer(&(nmea_rx_buf[checksum_start_char_idx + 1]), STRING_FORMAT_HEXADECIMAL, 2, &ck_value);
     STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
     // Cast to byte.
     (*ck) = (uint8_t) ck_value;
@@ -376,15 +376,15 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_TIME);
                 // Parse hours.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->hours = (uint8_t) value;
                 // Parse minutes.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 3]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 3]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->minutes = (uint8_t) value;
                 // Parse seconds.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 5]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 5]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->seconds = (uint8_t) value;
                 break;
@@ -393,7 +393,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_DAY);
                 // Parse day.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->date = (uint8_t) value;
                 break;
@@ -402,7 +402,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_MONTH);
                 // Parse month.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->month = (uint8_t) value;
                 break;
@@ -411,7 +411,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_YEAR);
                 // Parse year.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 4, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 4, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->year = (uint16_t) value;
                 break;
@@ -478,15 +478,15 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_LAT);
                 // Parse degrees.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->lat_degrees = (uint8_t) value;
                 // Parse minutes.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 3]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 3]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->lat_minutes = (uint8_t) value;
                 // Parse seconds.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 6]), STRING_FORMAT_DECIMAL, 5, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 6]), STRING_FORMAT_DECIMAL, 5, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->lat_seconds = (uint32_t) value;
                 break;
@@ -511,15 +511,15 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_LONG);
                 // Parse degrees.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 3, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 3, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->long_degrees = (uint8_t) value;
                 // Parse minutes.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 4]), STRING_FORMAT_DECIMAL, 2, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 4]), STRING_FORMAT_DECIMAL, 2, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->long_minutes = (uint8_t) value;
                 // Parse seconds.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 7]), STRING_FORMAT_DECIMAL, 5, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 7]), STRING_FORMAT_DECIMAL, 5, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->long_seconds = (uint32_t) value;
                 break;
@@ -552,13 +552,13 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                     }
                 }
                 // Compute integer part.
-                string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, alt_number_of_digits, &value);
+                string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, alt_number_of_digits, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->altitude = (uint32_t) value;
                 // Rounding operation if fractional part exists.
                 if ((char_idx - (separator_idx + alt_number_of_digits) - 1) >= 2) {
                     // Convert tenth part.
-                    string_status = STRING_string_to_value(&(nmea_rx_buf[separator_idx + alt_number_of_digits + 2]), STRING_FORMAT_DECIMAL, 1, &value);
+                    string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + alt_number_of_digits + 2]), STRING_FORMAT_DECIMAL, 1, &value);
                     STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                     if (value >= 5) {
                         (*gps_position).altitude++;
