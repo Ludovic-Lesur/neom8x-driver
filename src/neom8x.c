@@ -862,6 +862,14 @@ NEOM8X_status_t NEOM8X_set_backup_voltage(uint8_t state) {
 }
 #endif
 
+#ifdef NEOM8X_DRIVER_VBCKP_CONTROL
+/*******************************************************************/
+uint8_t NEOM8X_get_backup_voltage(void) {
+    // Call hardware function.
+    return NEOM8X_HW_get_backup_voltage();
+}
+#endif
+
 #ifdef NEOM8X_DRIVER_TIMEPULSE
 /*******************************************************************/
 NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* timepulse_config) {

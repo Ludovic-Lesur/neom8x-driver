@@ -80,4 +80,12 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_set_backup_voltage(uint8_t state
 }
 #endif
 
+#ifdef NEOM8X_DRIVER_VBCKP_CONTROL
+/*******************************************************************/
+uint8_t __attribute__((weak)) NEOM8X_HW_get_backup_voltage(void) {
+    /* To be implemented */
+    return 0;
+}
+#endif
+
 #endif /* NEOM8X_DRIVER_DISABLE */

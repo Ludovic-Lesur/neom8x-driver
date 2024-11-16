@@ -101,6 +101,17 @@ NEOM8X_status_t NEOM8X_HW_delay_milliseconds(uint32_t delay_ms);
 NEOM8X_status_t NEOM8X_HW_set_backup_voltage(uint8_t state);
 #endif
 
+#ifdef NEOM8X_DRIVER_VBCKP_CONTROL
+/*!******************************************************************
+ * \fn uint8_t NEOM8X_HW_get_backup_voltage(void);
+ * \brief Get GPS backup voltage state.
+ * \param[in]   none
+ * \param[out]  none
+ * \retval      VBCKP pin state.
+ *******************************************************************/
+uint8_t NEOM8X_HW_get_backup_voltage(void);
+#endif
+
 #endif /* NEOM8X_DRIVER_DISABLE */
 
 #endif /* __NEOM8X_HW_H__ */
