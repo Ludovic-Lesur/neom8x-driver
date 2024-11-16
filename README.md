@@ -13,6 +13,7 @@ Here is the versions compatibility table:
 
 | **neom8x-driver** | **embedded-utils** |
 |:---:|:---:|
+| [sw2.3](https://github.com/Ludovic-Lesur/neom8x-driver/releases/tag/sw2.3) | >= [sw5.0](https://github.com/Ludovic-Lesur/embedded-utils/releases/tag/sw5.0) |
 | [sw2.2](https://github.com/Ludovic-Lesur/neom8x-driver/releases/tag/sw2.2) | >= [sw5.0](https://github.com/Ludovic-Lesur/embedded-utils/releases/tag/sw5.0) |
 | [sw2.1](https://github.com/Ludovic-Lesur/neom8x-driver/releases/tag/sw2.1) | [sw2.0](https://github.com/Ludovic-Lesur/embedded-utils/releases/tag/sw2.0) to [sw4.0](https://github.com/Ludovic-Lesur/embedded-utils/releases/tag/sw4.0) |
 | [sw2.0](https://github.com/Ludovic-Lesur/neom8x-driver/releases/tag/sw2.0) | [sw2.0](https://github.com/Ludovic-Lesur/embedded-utils/releases/tag/sw2.0) to [sw4.0](https://github.com/Ludovic-Lesur/embedded-utils/releases/tag/sw4.0) |
