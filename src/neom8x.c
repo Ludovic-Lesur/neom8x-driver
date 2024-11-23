@@ -236,7 +236,6 @@ static uint8_t _NEOM8X_check_time(NEOM8X_time_t* gps_time) {
     // Local variables.
     uint8_t time_valid_flag = 0;
     // Check time fields.
-    // @formatter:off
     if (((gps_time->date) > 0) && ((gps_time->date) < 32) &&
         ((gps_time->month) > 0) && ((gps_time->month) < 13) &&
         ((gps_time->year) > 2023) && ((gps_time->year) < 2094) &&
@@ -246,7 +245,6 @@ static uint8_t _NEOM8X_check_time(NEOM8X_time_t* gps_time) {
     {
         time_valid_flag = 1;
     }
-    // @formatter:on
     return time_valid_flag;
 }
 #endif
@@ -257,13 +255,11 @@ static uint8_t _NEOM8X_check_position(NEOM8X_position_t* gps_position) {
     // Local variables.
     uint8_t position_valid_flag = 0;
     // Check position fields.
-    // @formatter:off
     if ((gps_position->lat_degrees < 90) && (gps_position->lat_minutes < 60) &&(gps_position->lat_seconds < 100000) &&
         (gps_position->long_degrees < 180) && (gps_position->long_minutes < 60) && (gps_position->long_seconds < 100000))
     {
         position_valid_flag = 1;
     }
-    // @formatter:on
     return position_valid_flag;
 }
 #endif
@@ -877,12 +873,10 @@ NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* timepulse
     NEOM8X_status_t status = NEOM8X_SUCCESS;
     uint64_t pulse_length_ratio = 0;
     // See p.222 for NEOM8X message format.
-    // @formatter:off
     uint8_t neom8x_cfg_tp5[NEOM8X_MSG_OVERHEAD_SIZE + NEOM8X_CFG_TP5_PAYLOAD_SIZE] = { 0xB5, 0x62, 0x06, 0x31, 0x20, 0x00, // Header.
         0x00, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // Payload.
         0, 0 // Checksum.
     };
-    // @formatter:on
     // Check parameters.
     if (timepulse_config == NULL) {
         status = NEOM8X_ERROR_NULL_PARAMETER;

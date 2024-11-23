@@ -56,7 +56,7 @@ NEOM8X_status_t NEOM8X_HW_de_init(void);
 /*!******************************************************************
  * \fn NEOM8X_status_t NEOM8X_HW_send_message(uint8_t* message, uint32_t message_size_bytes)
  * \brief Send a message over the NEOM8X control interface.
- * \param[in]   message: Byte array to send.
+ * \param[in]   message: Bytes array to send.
  * \param[in]   message_size_bytes: Number of bytes to send.
  * \param[out]  none
  * \retval      Function execution status.
