@@ -151,7 +151,7 @@ static NEOM8X_context_t neom8x_ctx;
 /*******************************************************************/
 static void _NEOM8X_rx_irq_callback(uint8_t message_byte) {
     // Store new byte.
-    neom8x_ctx.nmea_buffer[neom8x_ctx.nmea_buffer_idx_write][neom8x_ctx.nmea_char_idx] = message_byte;
+    neom8x_ctx.nmea_buffer[neom8x_ctx.nmea_buffer_idx_write][neom8x_ctx.nmea_char_idx] = (char_t) message_byte;
     // Manage character index.
     neom8x_ctx.nmea_char_idx++;
     // Check buffer size and NMEA ending marker.
@@ -163,7 +163,7 @@ static void _NEOM8X_rx_irq_callback(uint8_t message_byte) {
             neom8x_ctx.nmea_buffer_idx_ready = neom8x_ctx.nmea_buffer_idx_write;
         }
         // Switch buffer.
-        neom8x_ctx.nmea_buffer_idx_write = (neom8x_ctx.nmea_buffer_idx_write + 1) % NEOM8X_NMEA_RX_BUFFER_DEPTH;
+        neom8x_ctx.nmea_buffer_idx_write = (uint8_t) ((neom8x_ctx.nmea_buffer_idx_write + 1) % NEOM8X_NMEA_RX_BUFFER_DEPTH);
         neom8x_ctx.nmea_char_idx = 0;
         // Ask for processing.
         if ((message_byte == NEOM8X_NMEA_CHAR_END) && (neom8x_ctx.acquisition.process_callback != NULL)) {
@@ -300,7 +300,8 @@ static void _NEOM8X_compute_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck) {
     if (checksum_start_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE) goto errors;
     // Compute checksum.
     for (checksum_idx = (message_start_char_idx + 1); checksum_idx < checksum_start_char_idx; checksum_idx++) {
-        (*ck) ^= nmea_rx_buf[checksum_idx]; // Exclusive OR of all characters between '$' and '*'.
+        // Exclusive OR of all characters between '$' and '*'.
+        (*ck) ^= (uint8_t) nmea_rx_buf[checksum_idx];
     }
 errors:
     return;
@@ -538,7 +539,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 // Field 9 = altitude.
             case NEOM8X_NMEA_GGA_FIELD_INDEX_ALT:
                 // Get field length.
-                alt_field_size = (char_idx - separator_idx) - 1;
+                alt_field_size = (uint8_t) ((char_idx - separator_idx) - 1);
                 // Check field length.
                 if (alt_field_size == 0) goto errors;
                 // Get number of digits of integer part (search dot).
