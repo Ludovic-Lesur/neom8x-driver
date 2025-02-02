@@ -11,7 +11,7 @@
 #ifndef NEOM8X_DRIVER_DISABLE_FLAGS_FILE
 #include "neom8x_driver_flags.h"
 #endif
-#include "string.h"
+#include "strings.h"
 #include "types.h"
 
 /*** NEOM8X structures ***/

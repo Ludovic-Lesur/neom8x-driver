@@ -11,9 +11,9 @@
 #include "neom8x_driver_flags.h"
 #endif
 #include "error.h"
-#include "math.h"
+#include "maths.h"
 #include "neom8x_hw.h"
-#include "string.h"
+#include "strings.h"
 #include "types.h"
 
 #ifndef NEOM8X_DRIVER_DISABLE
