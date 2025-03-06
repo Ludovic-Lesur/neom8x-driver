@@ -281,13 +281,14 @@ static void _NEOM8X_compute_ubx_checksum(uint8_t* neom8x_command, uint8_t payloa
 }
 
 /*******************************************************************/
-static void _NEOM8X_compute_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck) {
+static void _NEOM8X_compute_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck, uint8_t* compute_success_flag) {
     // Local variables.
     uint8_t message_start_char_idx = 0;
     uint8_t checksum_start_char_idx = 0;
     uint8_t checksum_idx = 0;
-    // Reset value.
+    // Reset value and flag.
     (*ck) = 0;
+    (*compute_success_flag) = 0;
     // Get message start index (see algorithm on p.105 of NEO-M8 programming manual).
     while ((nmea_rx_buf[message_start_char_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (message_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
         message_start_char_idx++;
@@ -303,19 +304,21 @@ static void _NEOM8X_compute_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck) {
         // Exclusive OR of all characters between '$' and '*'.
         (*ck) ^= (uint8_t) nmea_rx_buf[checksum_idx];
     }
+    // Update output flag.
+    (*compute_success_flag) = 1;
 errors:
     return;
 }
 
 /*******************************************************************/
-static NEOM8X_status_t _NEOM8X_get_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck) {
+static void _NEOM8X_get_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck, uint8_t* get_success_flag) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
     STRING_status_t string_status = STRING_SUCCESS;
     uint8_t checksum_start_char_idx = 0;
     int32_t ck_value = 0;
-    // Reset value.
+    // Reset value and flag.
     (*ck) = 0;
+    (*get_success_flag) = 0;
     // Get checksum start index (see NMEA messages format on p.105 of NEO-M8 programming manual).
     while ((nmea_rx_buf[checksum_start_char_idx] != NEOM8X_NMEA_CHAR_CHECKSUM_START) && (checksum_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
         checksum_start_char_idx++;
@@ -323,11 +326,13 @@ static NEOM8X_status_t _NEOM8X_get_nmea_checksum(char_t* nmea_rx_buf, uint8_t* c
     if (checksum_start_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE) goto errors;
     // Convert hexadecimal to value.
     string_status = STRING_string_to_integer(&(nmea_rx_buf[checksum_start_char_idx + 1]), STRING_FORMAT_HEXADECIMAL, 2, &ck_value);
-    STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+    if (string_status != STRING_SUCCESS) goto errors;
     // Cast to byte.
     (*ck) = (uint8_t) ck_value;
+    // Update output flag.
+    (*get_success_flag) = 1;
 errors:
-    return status;
+    return;
 }
 
 #ifdef NEOM8X_DRIVER_GPS_DATA_TIME
@@ -336,20 +341,22 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
     // Local variables.
     NEOM8X_status_t status = NEOM8X_SUCCESS;
     STRING_status_t string_status = STRING_SUCCESS;
-    uint8_t char_idx = 0;
-    uint8_t separator_idx = 0;
+    uint8_t checksum_get_success_flag = 0;
+    uint8_t checksum_compute_success_flag = 0;
     uint8_t received_checksum = 0;
     uint8_t computed_checksum = 0;
-    int32_t value = 0;
+    uint8_t last_field_parsed = 0;
     NEOM8X_nmea_zda_field_index_t field_idx = 0;
+    uint8_t char_idx = 0;
+    uint8_t separator_idx = 0;
+    int32_t value = 0;
     // Reset flag.
     (*decode_success_flag) = 0;
     // Compute checksums.
-    status = _NEOM8X_get_nmea_checksum(nmea_rx_buf, &received_checksum);
-    if (status != NEOM8X_SUCCESS) goto errors;
-    _NEOM8X_compute_nmea_checksum(nmea_rx_buf, &computed_checksum);
+    _NEOM8X_get_nmea_checksum(nmea_rx_buf, &received_checksum, &checksum_get_success_flag);
+    _NEOM8X_compute_nmea_checksum(nmea_rx_buf, &computed_checksum, &checksum_compute_success_flag);
     // Verify checksum.
-    if (computed_checksum != received_checksum) goto errors;
+    if ((checksum_get_success_flag == 0) || (checksum_compute_success_flag == 0) || (computed_checksum != received_checksum)) goto errors;
     // Search NMEA start character.
     while ((nmea_rx_buf[separator_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (separator_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
         separator_idx++;
@@ -368,7 +375,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 // Check if message = 'ZDA'.
                 if ((nmea_rx_buf[separator_idx + 3] != 'Z') || (nmea_rx_buf[separator_idx + 4] != 'D') || (nmea_rx_buf[separator_idx + 5] != 'A')) goto errors;
                 break;
-                // Field 1 = time = hhmmss.ss.
+            // Field 1 = time = hhmmss.ss.
             case NEOM8X_NMEA_ZDA_FIELD_INDEX_TIME:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_TIME);
@@ -385,7 +392,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->seconds = (uint8_t) value;
                 break;
-                // Field 2 = day = dd.
+            // Field 2 = day = dd.
             case NEOM8X_NMEA_ZDA_FIELD_INDEX_DAY:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_DAY);
@@ -394,7 +401,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->date = (uint8_t) value;
                 break;
-                // Field 3 = month = mm.
+            // Field 3 = month = mm.
             case NEOM8X_NMEA_ZDA_FIELD_INDEX_MONTH:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_MONTH);
@@ -403,7 +410,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->month = (uint8_t) value;
                 break;
-                // Field 4 = year = yyyy.
+            // Field 4 = year = yyyy.
             case NEOM8X_NMEA_ZDA_FIELD_INDEX_YEAR:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_YEAR);
@@ -411,8 +418,10 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 4, &value);
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_time->year = (uint16_t) value;
+                // Update local flag.
+                last_field_parsed = 1;
                 break;
-                // Unused or unknown fields.
+            // Unused or unknown fields.
             default:
                 break;
             }
@@ -423,8 +432,10 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
         // Increment character index.
         char_idx++;
     }
-    // Check if time is valid.
-    (*decode_success_flag) = _NEOM8X_check_time(gps_time);
+    if (last_field_parsed != 0) {
+        // Check if time is valid.
+        (*decode_success_flag) = _NEOM8X_check_time(gps_time);
+    }
 errors:
     return status;
 }
@@ -436,22 +447,24 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
     // Local variables
     NEOM8X_status_t status = NEOM8X_SUCCESS;
     STRING_status_t string_status = STRING_SUCCESS;
-    uint8_t char_idx = 0;
-    uint8_t separator_idx = 0;
-    uint8_t field_idx = 0;
-    uint8_t alt_field_size = 0;
-    uint8_t alt_number_of_digits = 0;
+    uint8_t checksum_get_success_flag = 0;
+    uint8_t checksum_compute_success_flag = 0;
     uint8_t received_checksum = 0;
     uint8_t computed_checksum = 0;
+    uint8_t last_field_parsed = 0;
+    NMEA_gga_field_index_t field_idx = 0;
+    uint8_t char_idx = 0;
+    uint8_t separator_idx = 0;
+    uint8_t alt_field_size = 0;
+    uint8_t alt_number_of_digits = 0;
     int32_t value = 0;
     // Reset flag.
     (*decode_success_flag) = 0;
     // Compute checksums.
-    status = _NEOM8X_get_nmea_checksum(nmea_rx_buf, &received_checksum);
-    if (status != NEOM8X_SUCCESS) goto errors;
-    _NEOM8X_compute_nmea_checksum(nmea_rx_buf, &computed_checksum);
+    _NEOM8X_get_nmea_checksum(nmea_rx_buf, &received_checksum, &checksum_get_success_flag);
+    _NEOM8X_compute_nmea_checksum(nmea_rx_buf, &computed_checksum, &checksum_compute_success_flag);
     // Verify checksum.
-    if (computed_checksum != received_checksum) goto errors;
+    if ((checksum_get_success_flag == 0) || (checksum_compute_success_flag == 0) || (computed_checksum != received_checksum)) goto errors;
     // Search NMEA start character.
     while ((nmea_rx_buf[separator_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (separator_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
         separator_idx++;
@@ -470,7 +483,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 // Check if message = 'GGA'.
                 if ((nmea_rx_buf[separator_idx + 3] != 'G') || (nmea_rx_buf[separator_idx + 4] != 'G') || (nmea_rx_buf[separator_idx + 5] != 'A')) goto errors;
                 break;
-                // Field 2 = latitude = ddmm.mmmmm.
+            // Field 2 = latitude = ddmm.mmmmm.
             case NEOM8X_NMEA_GGA_FIELD_INDEX_LAT:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_LAT);
@@ -487,7 +500,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->lat_seconds = (uint32_t) value;
                 break;
-                // Field 3 = N or S.
+            // Field 3 = N or S.
             case NEOM8X_NMEA_GGA_FIELD_INDEX_NS:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_NS);
@@ -503,7 +516,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                     goto errors;
                 }
                 break;
-                // Field 4 = longitude = dddmm.mmmmm.
+            // Field 4 = longitude = dddmm.mmmmm.
             case NEOM8X_NMEA_GGA_FIELD_INDEX_LONG:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_LONG);
@@ -520,7 +533,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
                 gps_position->long_seconds = (uint32_t) value;
                 break;
-                // Field 5 = E or W.
+            // Field 5 = E or W.
             case NEOM8X_NMEA_GGA_FIELD_INDEX_EW:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_EW);
@@ -536,7 +549,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                     goto errors;
                 }
                 break;
-                // Field 9 = altitude.
+            // Field 9 = altitude.
             case NEOM8X_NMEA_GGA_FIELD_INDEX_ALT:
                 // Get field length.
                 alt_field_size = (uint8_t) ((char_idx - separator_idx) - 1);
@@ -562,12 +575,14 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                     }
                 }
                 break;
-                // Field 10 = altitude unit.
+            // Field 10 = altitude unit.
             case NEOM8X_NMEA_GGA_FIELD_INDEX_U_ALT:
                 // Check field length.
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_U_ALT);
                 // Parse altitude unit.
                 if (nmea_rx_buf[separator_idx + 1] != NEOM8X_NMEA_GGA_METERS) goto errors;
+                // Update local flag.
+                last_field_parsed = 1;
                 break;
                 // Unused or unknown fields.
             default:
@@ -580,8 +595,10 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
         // Increment character index.
         char_idx++;
     }
-    // Check if time is valid.
-    (*decode_success_flag) = _NEOM8X_check_position(gps_position);
+    if (last_field_parsed != 0) {
+        // Check if time is valid.
+        (*decode_success_flag) = _NEOM8X_check_position(gps_position);
+    }
 errors:
     return status;
 }
@@ -706,6 +723,7 @@ NEOM8X_status_t NEOM8X_start_acquisition(NEOM8X_acquisition_t* acquisition) {
         _NEOM8X_reset_position(&(neom8x_ctx.gps_position));
         // Select GGA message to get complete position.
         status = _NEOM8X_select_nmea_messages(NEOM8X_NMEA_GGA_MASK);
+        if (status != NEOM8X_SUCCESS) goto errors;
         break;
 #endif
     default:
