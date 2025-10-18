@@ -149,6 +149,9 @@ static NEOM8X_context_t neom8x_ctx;
 #define _NEOM8X_check_field_size(field_size) { if ((char_idx - separator_idx) != (field_size + 1)) goto errors; }
 
 /*******************************************************************/
+#define _NEOM8X_check_string_status(void) { if (string_status != STRING_SUCCESS) goto errors; }
+
+/*******************************************************************/
 static void _NEOM8X_rx_irq_callback(uint8_t message_byte) {
     // Store new byte.
     neom8x_ctx.nmea_buffer[neom8x_ctx.nmea_buffer_idx_write][neom8x_ctx.nmea_char_idx] = (char_t) message_byte;
@@ -337,9 +340,8 @@ errors:
 
 #ifdef NEOM8X_DRIVER_GPS_DATA_TIME
 /*******************************************************************/
-static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t* gps_time, uint8_t* decode_success_flag) {
+static void _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t* gps_time, uint8_t* decode_success_flag) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
     STRING_status_t string_status = STRING_SUCCESS;
     uint8_t checksum_get_success_flag = 0;
     uint8_t checksum_compute_success_flag = 0;
@@ -381,15 +383,15 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_TIME);
                 // Parse hours.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_time->hours = (uint8_t) value;
                 // Parse minutes.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 3]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_time->minutes = (uint8_t) value;
                 // Parse seconds.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 5]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_time->seconds = (uint8_t) value;
                 break;
             // Field 2 = day = dd.
@@ -398,7 +400,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_DAY);
                 // Parse day.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_time->date = (uint8_t) value;
                 break;
             // Field 3 = month = mm.
@@ -407,7 +409,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_MONTH);
                 // Parse month.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_time->month = (uint8_t) value;
                 break;
             // Field 4 = year = yyyy.
@@ -416,7 +418,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
                 _NEOM8X_check_field_size(NEOM8X_NMEA_ZDA_FIELD_SIZE_YEAR);
                 // Parse year.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 4, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_time->year = (uint16_t) value;
                 // Update local flag.
                 last_field_parsed = 1;
@@ -437,15 +439,14 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t
         (*decode_success_flag) = _NEOM8X_check_time(gps_time);
     }
 errors:
-    return status;
+    return;
 }
 #endif
 
 #ifdef NEOM8X_DRIVER_GPS_DATA_POSITION
 /*******************************************************************/
-static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_position_t* gps_position, uint8_t* decode_success_flag) {
+static void _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_position_t* gps_position, uint8_t* decode_success_flag) {
     // Local variables
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
     STRING_status_t string_status = STRING_SUCCESS;
     uint8_t checksum_get_success_flag = 0;
     uint8_t checksum_compute_success_flag = 0;
@@ -489,15 +490,15 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_LAT);
                 // Parse degrees.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_position->lat_degrees = (uint8_t) value;
                 // Parse minutes.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 3]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_position->lat_minutes = (uint8_t) value;
                 // Parse seconds.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 6]), STRING_FORMAT_DECIMAL, 5, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_position->lat_seconds = (uint32_t) value;
                 break;
             // Field 3 = N or S.
@@ -522,15 +523,15 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 _NEOM8X_check_field_size(NEOM8X_NMEA_GGA_FIELD_SIZE_LONG);
                 // Parse degrees.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, 3, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_position->long_degrees = (uint8_t) value;
                 // Parse minutes.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 4]), STRING_FORMAT_DECIMAL, 2, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_position->long_minutes = (uint8_t) value;
                 // Parse seconds.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 7]), STRING_FORMAT_DECIMAL, 5, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_position->long_seconds = (uint32_t) value;
                 break;
             // Field 5 = E or W.
@@ -563,13 +564,13 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
                 }
                 // Compute integer part.
                 string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + 1]), STRING_FORMAT_DECIMAL, alt_number_of_digits, &value);
-                STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                _NEOM8X_check_string_status();
                 gps_position->altitude = (uint32_t) value;
                 // Rounding operation if fractional part exists.
                 if ((char_idx - (separator_idx + alt_number_of_digits) - 1) >= 2) {
                     // Convert tenth part.
                     string_status = STRING_string_to_integer(&(nmea_rx_buf[separator_idx + alt_number_of_digits + 2]), STRING_FORMAT_DECIMAL, 1, &value);
-                    STRING_exit_error(NEOM8X_ERROR_BASE_STRING);
+                    _NEOM8X_check_string_status();
                     if (value >= 5) {
                         (*gps_position).altitude++;
                     }
@@ -600,7 +601,7 @@ static NEOM8X_status_t _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_positi
         (*decode_success_flag) = _NEOM8X_check_position(gps_position);
     }
 errors:
-    return status;
+    return;
 }
 #endif
 
@@ -778,8 +779,7 @@ NEOM8X_status_t NEOM8X_process(void) {
 #ifdef NEOM8X_DRIVER_GPS_DATA_TIME
     case NEOM8X_GPS_DATA_TIME:
         // Parse buffer.
-        status = _NEOM8X_parse_nmea_zda((char_t*) neom8x_ctx.nmea_buffer[neom8x_ctx.nmea_buffer_idx_ready], &gps_time, &decode_success_flag);
-        if (status != NEOM8X_SUCCESS) goto errors;
+        _NEOM8X_parse_nmea_zda((char_t*) neom8x_ctx.nmea_buffer[neom8x_ctx.nmea_buffer_idx_ready], &gps_time, &decode_success_flag);
         // Check decoding result.
         if (decode_success_flag != 0) {
             // Copy data and update status.
@@ -791,8 +791,7 @@ NEOM8X_status_t NEOM8X_process(void) {
 #ifdef NEOM8X_DRIVER_GPS_DATA_POSITION
     case NEOM8X_GPS_DATA_POSITION:
         // Parse buffer.
-        status = _NEOM8X_parse_nmea_gga((char_t*) neom8x_ctx.nmea_buffer[neom8x_ctx.nmea_buffer_idx_ready], &gps_position, &decode_success_flag);
-        if (status != NEOM8X_SUCCESS) goto errors;
+        _NEOM8X_parse_nmea_gga((char_t*) neom8x_ctx.nmea_buffer[neom8x_ctx.nmea_buffer_idx_ready], &gps_position, &decode_success_flag);
         // Check decoding result.
         if (decode_success_flag != 0) {
             // Copy data and update status.
