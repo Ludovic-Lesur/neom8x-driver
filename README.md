@@ -40,3 +40,27 @@ Here is the versions compatibility table:
 | `NEOM8X_DRIVER_ALTITUDE_STABILITY_THRESHOLD` | `<value>` | Altitude stability filter threshold (used when mode is `1`).
 | `NEOM8X_DRIVER_VBCKP_CONTROL` | `defined` / `undefined` | Enable or disable the backup voltage pin control. |
 | `NEOM8X_DRIVER_TIMEPULSE` | `defined` / `undefined` | Enable or disable the timepulse signal control. |
+
+# Build
+
+A static library can be compiled by command line with `cmake`.
+
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_TOOLCHAIN_FILE="<toolchain_file_path>" \
+      -DTOOLCHAIN_PATH="<arm-none-eabi-gcc_path>" \
+      -DTYPES_PATH="<types_file_path>" \
+      -DEMBEDDED_UTILS_PATH="<embedded-utils_path>" \
+      -DNEOM8X_DRIVER_GPIO_ERROR_BASE_LAST=0 \
+      -DNEOM8X_DRIVER_UART_ERROR_BASE_LAST=0 \
+      -DNEOM8X_DRIVER_DELAY_ERROR_BASE_LAST=0 \
+      -DNEOM8X_DRIVER_GPS_DATA_TIME=ON \
+      -DNEOM8X_DRIVER_GPS_DATA_POSITION=ON \
+      -DNEOM8X_DRIVER_ALTITUDE_STABILITY_FILTER_MODE=2 \
+      -DNEOM8X_DRIVER_ALTITUDE_STABILITY_THRESHOLD=5 \
+      -DNEOM8X_DRIVER_VBCKP_CONTROL=ON \
+      -DNEOM8X_DRIVER_TIMEPULSE=ON \
+      -G "Unix Makefiles" ..
+make all
+```
