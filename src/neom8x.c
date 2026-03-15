@@ -878,9 +878,18 @@ NEOM8X_status_t NEOM8X_set_backup_voltage(uint8_t state) {
 
 #ifdef NEOM8X_DRIVER_VBCKP_CONTROL
 /*******************************************************************/
-uint8_t NEOM8X_get_backup_voltage(void) {
+NEOM8X_status_t NEOM8X_get_backup_voltage(uint8_t* state) {
+    // Local variables.
+    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    // Check parameter.
+    if (state == NULL) {
+        status = NEOM8X_ERROR_NULL_PARAMETER;
+        goto errors;
+    }
     // Call hardware function.
-    return NEOM8X_HW_get_backup_voltage();
+    status = NEOM8X_HW_get_backup_voltage(state);
+errors:
+    return status;
 }
 #endif
 

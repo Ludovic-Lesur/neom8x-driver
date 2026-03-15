@@ -219,13 +219,13 @@ NEOM8X_status_t NEOM8X_set_backup_voltage(uint8_t state);
 
 #ifdef NEOM8X_DRIVER_VBCKP_CONTROL
 /*!******************************************************************
- * \fn uint8_t NEOM8X_get_backup_voltage(void);
+ * \fn NEOM8X_status_t NEOM8X_get_backup_voltage(uint8_t* state)
  * \brief Get GPS backup voltage state.
  * \param[in]   none
- * \param[out]  none
- * \retval      VBCKP pin state.
+ * \param[out]  state: Pointer to the current VBCKP pin state.
+ * \retval      Function execution status.
  *******************************************************************/
-uint8_t NEOM8X_get_backup_voltage(void);
+NEOM8X_status_t NEOM8X_get_backup_voltage(uint8_t* state);
 #endif
 
 #ifdef NEOM8X_DRIVER_TIMEPULSE
