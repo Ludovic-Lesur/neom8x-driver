@@ -20,7 +20,7 @@
 /*******************************************************************/
 NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_init(NEOM8X_HW_configuration_t* configuration) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    NEOM8X_status_t status = NEOM8X_ERROR_HW_FUNCTION_NOT_IMPLEMENTED;
     /* To be implemented */
     UNUSED(configuration);
     return status;
@@ -29,7 +29,7 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_init(NEOM8X_HW_configuration_t* 
 /*******************************************************************/
 NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_de_init(void) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    NEOM8X_status_t status = NEOM8X_ERROR_HW_FUNCTION_NOT_IMPLEMENTED;
     /* To be implemented */
     return status;
 }
@@ -37,7 +37,7 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_de_init(void) {
 /*******************************************************************/
 NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_send_message(uint8_t* message, uint32_t message_size_bytes) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    NEOM8X_status_t status = NEOM8X_ERROR_HW_FUNCTION_NOT_IMPLEMENTED;
     /* To be implemented */
     UNUSED(message);
     UNUSED(message_size_bytes);
@@ -47,7 +47,7 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_send_message(uint8_t* message, u
 /*******************************************************************/
 NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_start_rx(void) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    NEOM8X_status_t status = NEOM8X_ERROR_HW_FUNCTION_NOT_IMPLEMENTED;
     /* To be implemented */
     return status;
 }
@@ -55,7 +55,7 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_start_rx(void) {
 /*******************************************************************/
 NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_stop_rx(void) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    NEOM8X_status_t status = NEOM8X_ERROR_HW_FUNCTION_NOT_IMPLEMENTED;
     /* To be implemented */
     return status;
 }
@@ -63,7 +63,7 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_stop_rx(void) {
 /*******************************************************************/
 NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_delay_milliseconds(uint32_t delay_ms) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    NEOM8X_status_t status = NEOM8X_ERROR_HW_FUNCTION_NOT_IMPLEMENTED;
     /* To be implemented */
     UNUSED(delay_ms);
     return status;
@@ -73,7 +73,7 @@ NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_delay_milliseconds(uint32_t dela
 /*******************************************************************/
 NEOM8X_status_t __attribute__((weak)) NEOM8X_HW_set_backup_voltage(uint8_t state) {
     // Local variables.
-    NEOM8X_status_t status = NEOM8X_SUCCESS;
+    NEOM8X_status_t status = NEOM8X_ERROR_HW_FUNCTION_NOT_IMPLEMENTED;
     /* To be implemented */
     UNUSED(state);
     return status;
