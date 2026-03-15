@@ -22,13 +22,15 @@
 
 #define NEOM8X_UART_BAUD_RATE                   9600
 
-#define NEOM8X_MSG_OVERHEAD_SIZE                8
-#define NEOM8X_CHECKSUM_OVERHEAD_SIZE           4
-#define NEOM8X_CHECKSUM_OFFSET                  2
-#define NEOM8X_CFG_MSG_PAYLOAD_SIZE             8
-#define NEOM8X_CFG_TP5_PAYLOAD_SIZE             32
+#define NEOM8X_UBX_MSG_OVERHEAD_SIZE_BYTES      8
 
-#define NEOM8X_NMEA_RX_BUFFER_SIZE              128
+#define NEOM8X_UBX_CHECKSUM_OVERHEAD_SIZE_BYTES 4
+#define NEOM8X_UBX_CHECKSUM_OFFSET_BYTES        2
+
+#define NEOM8X_UBX_CFG_MSG_PAYLOAD_SIZE_BYTES   8
+#define NEOM8X_UBX_CFG_TP5_PAYLOAD_SIZE_BYTES   32
+
+#define NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES        128
 #define NEOM8X_NMEA_RX_BUFFER_DEPTH             2
 
 #define NEOM8X_NMEA_CHAR_MESSAGE_START          '$'
@@ -36,25 +38,45 @@
 #define NEOM8X_NMEA_CHAR_SEPARATOR              ','
 #define NEOM8X_NMEA_CHAR_END                    STRING_CHAR_LF
 
-#define NEOM8X_NMEA_ZDA_MASK                    0x00020000
-#define NEOM8X_NMEA_GGA_MASK                    0x00000008
-
 #define NEOM8X_NMEA_GGA_NORTH                   'N'
 #define NEOM8X_NMEA_GGA_SOUTH                   'S'
 #define NEOM8X_NMEA_GGA_EAST                    'E'
 #define NEOM8X_NMEA_GGA_WEST                    'W'
 #define NEOM8X_NMEA_GGA_METERS                  'M'
 
-#define NEOM8X_TIMEPULSE_FREQUENCY_MAX_HZ       10000000
+#define NEOM8X_TIMEPULSE_FREQUENCY_HZ_MAX       10000000
 
 #if (NEOM8X_DRIVER_ALTITUDE_STABILITY_FILTER_MODE == 1)
 #define NEOM8X_ALTITUDE_STABILITY_THRESHOLD     NEOM8X_DRIVER_ALTITUDE_STABILITY_THRESHOLD
 #endif
 #if (NEOM8X_DRIVER_ALTITUDE_STABILITY_FILTER_MODE == 2)
-#define NEOM8X_ALTITUDE_STABILITY_THRESHOLD     neom8x_ctx.acquisition.altitude_stability_threshold
+#define NEOM8X_ALTITUDE_STABILITY_THRESHOLD     (neom8x_ctx.acquisition.altitude_stability_threshold)
 #endif
 
 /*** NEOM8X local structures ***/
+
+/*******************************************************************/
+typedef enum {
+    NEOM8X_NMEA_MESSAGE_INDEX_DTM = 0,
+    NEOM8X_NMEA_MESSAGE_INDEX_GBQ,
+    NEOM8X_NMEA_MESSAGE_INDEX_GGS,
+    NEOM8X_NMEA_MESSAGE_INDEX_GGA,
+    NEOM8X_NMEA_MESSAGE_INDEX_GLL,
+    NEOM8X_NMEA_MESSAGE_INDEX_GLQ,
+    NEOM8X_NMEA_MESSAGE_INDEX_GNQ,
+    NEOM8X_NMEA_MESSAGE_INDEX_GNS,
+    NEOM8X_NMEA_MESSAGE_INDEX_GPQ,
+    NEOM8X_NMEA_MESSAGE_INDEX_GRS,
+    NEOM8X_NMEA_MESSAGE_INDEX_GSA,
+    NEOM8X_NMEA_MESSAGE_INDEX_GST,
+    NEOM8X_NMEA_MESSAGE_INDEX_GSV,
+    NEOM8X_NMEA_MESSAGE_INDEX_RMC,
+    NEOM8X_NMEA_MESSAGE_INDEX_TXT,
+    NEOM8X_NMEA_MESSAGE_INDEX_VLW,
+    NEOM8X_NMEA_MESSAGE_INDEX_VTG,
+    NEOM8X_NMEA_MESSAGE_INDEX_ZDA,
+    NEOM8X_NMEA_MESSAGE_INDEX_LAST
+} NEOM8X_nmea_message_index_t;
 
 /*******************************************************************/
 typedef enum {
@@ -119,7 +141,7 @@ typedef enum {
 /*******************************************************************/
 typedef struct {
     // Buffers.
-    volatile char_t nmea_buffer[NEOM8X_NMEA_RX_BUFFER_DEPTH][NEOM8X_NMEA_RX_BUFFER_SIZE];
+    volatile char_t nmea_buffer[NEOM8X_NMEA_RX_BUFFER_DEPTH][NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES];
     volatile uint8_t nmea_char_idx;
     volatile uint8_t nmea_buffer_idx_write;
     volatile uint8_t nmea_buffer_idx_ready;
@@ -158,7 +180,7 @@ static void _NEOM8X_rx_irq_callback(uint8_t message_byte) {
     // Manage character index.
     neom8x_ctx.nmea_char_idx++;
     // Check buffer size and NMEA ending marker.
-    if ((message_byte == NEOM8X_NMEA_CHAR_END) || (neom8x_ctx.nmea_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    if ((message_byte == NEOM8X_NMEA_CHAR_END) || (neom8x_ctx.nmea_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         // Check ending marker.
         if (message_byte == NEOM8X_NMEA_CHAR_END) {
             // Update flag.
@@ -268,19 +290,19 @@ static uint8_t _NEOM8X_check_position(NEOM8X_position_t* gps_position) {
 #endif
 
 /*******************************************************************/
-static void _NEOM8X_compute_ubx_checksum(uint8_t* neom8x_command, uint8_t payload_length) {
+static void _NEOM8X_compute_ubx_checksum(uint8_t* ubx_command, uint8_t payload_length) {
     // Local variables.
     uint8_t ck_a = 0;
     uint8_t ck_b = 0;
-    uint32_t checksum_idx = 0;
+    uint32_t idx = 0;
     // See algorithm on p.136 of NEO-M8 programming manual.
-    for (checksum_idx = NEOM8X_CHECKSUM_OFFSET; checksum_idx < ((uint32_t) (NEOM8X_CHECKSUM_OFFSET + NEOM8X_CHECKSUM_OVERHEAD_SIZE + payload_length)); checksum_idx++) {
-        ck_a = ck_a + neom8x_command[checksum_idx];
+    for (idx = NEOM8X_UBX_CHECKSUM_OFFSET_BYTES; idx < ((uint32_t) (NEOM8X_UBX_CHECKSUM_OFFSET_BYTES + NEOM8X_UBX_CHECKSUM_OVERHEAD_SIZE_BYTES + payload_length)); idx++) {
+        ck_a = ck_a + ubx_command[idx];
         ck_b = ck_b + ck_a;
     }
-    // Fill two last bytes of the NEOM8X message with CK_A and CK_B.
-    neom8x_command[checksum_idx + 0] = ck_a;
-    neom8x_command[checksum_idx + 1] = ck_b;
+    // Fill two last bytes of the UBX message with CK_A and CK_B.
+    ubx_command[idx + 0] = ck_a;
+    ubx_command[idx + 1] = ck_b;
 }
 
 /*******************************************************************/
@@ -293,15 +315,15 @@ static void _NEOM8X_compute_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck, uint
     (*ck) = 0;
     (*compute_success_flag) = 0;
     // Get message start index (see algorithm on p.105 of NEO-M8 programming manual).
-    while ((nmea_rx_buf[message_start_char_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (message_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    while ((nmea_rx_buf[message_start_char_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (message_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         message_start_char_idx++;
     }
     // Get checksum start index.
     checksum_start_char_idx = message_start_char_idx;
-    while ((nmea_rx_buf[checksum_start_char_idx] != NEOM8X_NMEA_CHAR_CHECKSUM_START) && (checksum_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    while ((nmea_rx_buf[checksum_start_char_idx] != NEOM8X_NMEA_CHAR_CHECKSUM_START) && (checksum_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         checksum_start_char_idx++;
     }
-    if (checksum_start_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE) goto errors;
+    if (checksum_start_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES) goto errors;
     // Compute checksum.
     for (checksum_idx = (message_start_char_idx + 1); checksum_idx < checksum_start_char_idx; checksum_idx++) {
         // Exclusive OR of all characters between '$' and '*'.
@@ -323,10 +345,10 @@ static void _NEOM8X_get_nmea_checksum(char_t* nmea_rx_buf, uint8_t* ck, uint8_t*
     (*ck) = 0;
     (*get_success_flag) = 0;
     // Get checksum start index (see NMEA messages format on p.105 of NEO-M8 programming manual).
-    while ((nmea_rx_buf[checksum_start_char_idx] != NEOM8X_NMEA_CHAR_CHECKSUM_START) && (checksum_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    while ((nmea_rx_buf[checksum_start_char_idx] != NEOM8X_NMEA_CHAR_CHECKSUM_START) && (checksum_start_char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         checksum_start_char_idx++;
     }
-    if (checksum_start_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE) goto errors;
+    if (checksum_start_char_idx >= NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES) goto errors;
     // Convert hexadecimal to value.
     string_status = STRING_string_to_integer(&(nmea_rx_buf[checksum_start_char_idx + 1]), STRING_FORMAT_HEXADECIMAL, 2, &ck_value);
     if (string_status != STRING_SUCCESS) goto errors;
@@ -360,12 +382,12 @@ static void _NEOM8X_parse_nmea_zda(char_t* nmea_rx_buf, NEOM8X_time_t* gps_time,
     // Verify checksum.
     if ((checksum_get_success_flag == 0) || (checksum_compute_success_flag == 0) || (computed_checksum != received_checksum)) goto errors;
     // Search NMEA start character.
-    while ((nmea_rx_buf[separator_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (separator_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    while ((nmea_rx_buf[separator_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (separator_idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         separator_idx++;
         char_idx++;
     }
     // Extract NMEA data (see ZDA message format on p.127 of NEO-M8 programming manual).
-    while ((nmea_rx_buf[char_idx] != NEOM8X_NMEA_CHAR_END) && (char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    while ((nmea_rx_buf[char_idx] != NEOM8X_NMEA_CHAR_END) && (char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         // Check if separator is found.
         if (nmea_rx_buf[char_idx] == NEOM8X_NMEA_CHAR_SEPARATOR) {
             // Get current field.
@@ -467,12 +489,12 @@ static void _NEOM8X_parse_nmea_gga(char_t* nmea_rx_buf, NEOM8X_position_t* gps_p
     // Verify checksum.
     if ((checksum_get_success_flag == 0) || (checksum_compute_success_flag == 0) || (computed_checksum != received_checksum)) goto errors;
     // Search NMEA start character.
-    while ((nmea_rx_buf[separator_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (separator_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    while ((nmea_rx_buf[separator_idx] != NEOM8X_NMEA_CHAR_MESSAGE_START) && (separator_idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         separator_idx++;
         char_idx++;
     }
     // Extract NMEA data (see GGA message format on p.114 of NEO-M8 programming manual).
-    while ((nmea_rx_buf[char_idx] != NEOM8X_NMEA_CHAR_END) && (char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE)) {
+    while ((nmea_rx_buf[char_idx] != NEOM8X_NMEA_CHAR_END) && (char_idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES)) {
         // Check if separator is found.
         if (nmea_rx_buf[char_idx] == NEOM8X_NMEA_CHAR_SEPARATOR) {
             // Get current field.
@@ -610,23 +632,49 @@ static NEOM8X_status_t _NEOM8X_select_nmea_messages(uint32_t nmea_message_id_mas
     // Local variables.
     NEOM8X_status_t status = NEOM8X_SUCCESS;
     // See p.110 for NMEA messages ID.
-    uint8_t nmea_message_id[18] = { 0x0A, 0x44, 0x09, 0x00, 0x01, 0x43, 0x42, 0x0D, 0x40, 0x06, 0x02, 0x07, 0x03, 0x04, 0x41, 0x0F, 0x05, 0x08 };
-    uint8_t nmea_message_id_idx = 0;
-    // See p.174 for NEOM8X message format.
-    uint8_t neom8x_cfg_msg[NEOM8X_MSG_OVERHEAD_SIZE + NEOM8X_CFG_MSG_PAYLOAD_SIZE] = { 0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    uint8_t nmea_message_id[NEOM8X_NMEA_MESSAGE_INDEX_LAST] = {
+        0x0A, // DTM.
+        0x44, // GBQ.
+        0x09, // GBS.
+        0x00, // GGA.
+        0x01, // GLL.
+        0x43, // GLQ.
+        0x42, // GNQ.
+        0x0D, // GNS.
+        0x40, // GPQ.
+        0x06, // GRS.
+        0x02, // GSA.
+        0x07, // GST.
+        0x03, // GSV.
+        0x04, // RMC.
+        0x41, // TXT.
+        0x0F, // VLW.
+        0x05, // VTG.
+        0x08  // ZDA.
+    };
+    // See p.174 for UBX message format.
+    uint8_t ubx_cfg_msg[NEOM8X_UBX_MSG_OVERHEAD_SIZE_BYTES + NEOM8X_UBX_CFG_MSG_PAYLOAD_SIZE_BYTES] = {
+        0xB5, 0x62,                             // Preamble.
+        0x06, 0x01,                             // UBX message class and ID.
+        NEOM8X_UBX_CFG_MSG_PAYLOAD_SIZE_BYTES, 0x00,  // Length.
+        0xF0, 0x00,                             // NMEA message class and ID.
+        0, 0, 0, 0, 0, 0,                       // Message rate on each port.
+        0x00, 0x00                              // UBX checksum.
+    };
+    uint8_t nmea_idx = 0;
     uint8_t idx = 0;
     // Send commands.
-    for (nmea_message_id_idx = 0; nmea_message_id_idx < 18; nmea_message_id_idx++) {
-        // Byte 7 = is the ID of the message to enable or disable.
-        neom8x_cfg_msg[7] = nmea_message_id[nmea_message_id_idx];
+    for (nmea_idx = 0; nmea_idx < NEOM8X_NMEA_MESSAGE_INDEX_LAST; nmea_idx++) {
+        // Byte 7 = ID of the message to enable or disable.
+        ubx_cfg_msg[7] = nmea_message_id[nmea_idx];
         // Bytes 8-13 = message rate.
         for (idx = 8; idx < 14; idx++) {
-            neom8x_cfg_msg[idx] = ((nmea_message_id_mask & (0b1 << nmea_message_id_idx)) != 0) ? 1 : 0;
+            ubx_cfg_msg[idx] = ((nmea_message_id_mask & (0b1 << nmea_idx)) != 0) ? 1 : 0;
         }
-        // Bytes 14-15 = NEOM8X checksum (CK_A and CK_B).
-        _NEOM8X_compute_ubx_checksum(neom8x_cfg_msg, NEOM8X_CFG_MSG_PAYLOAD_SIZE);
+        // Bytes 14-15 = UBX checksum (CK_A and CK_B).
+        _NEOM8X_compute_ubx_checksum(ubx_cfg_msg, NEOM8X_UBX_CFG_MSG_PAYLOAD_SIZE_BYTES);
         // Send message.
-        status = NEOM8X_HW_send_message(neom8x_cfg_msg, (NEOM8X_MSG_OVERHEAD_SIZE + NEOM8X_CFG_MSG_PAYLOAD_SIZE));
+        status = NEOM8X_HW_send_message(ubx_cfg_msg, (NEOM8X_UBX_MSG_OVERHEAD_SIZE_BYTES + NEOM8X_UBX_CFG_MSG_PAYLOAD_SIZE_BYTES));
         if (status != NEOM8X_SUCCESS) goto errors;
         // Delay between messages.
         status = NEOM8X_HW_delay_milliseconds(100);
@@ -647,7 +695,7 @@ NEOM8X_status_t NEOM8X_init(void) {
     uint32_t idx = 0;
     // Init context.
     for (buffer_idx = 0; buffer_idx < NEOM8X_NMEA_RX_BUFFER_DEPTH; buffer_idx++) {
-        for (idx = 0; idx < NEOM8X_NMEA_RX_BUFFER_SIZE; idx++)
+        for (idx = 0; idx < NEOM8X_NMEA_RX_BUFFER_SIZE_BYTES; idx++)
             neom8x_ctx.nmea_buffer[buffer_idx][idx] = 0;
     }
     neom8x_ctx.nmea_buffer_idx_write = 0;
@@ -714,7 +762,7 @@ NEOM8X_status_t NEOM8X_start_acquisition(NEOM8X_acquisition_t* acquisition) {
         // Reset structure.
         _NEOM8X_reset_time(&(neom8x_ctx.gps_time));
         // Select ZDA message to get complete date and time.
-        status = _NEOM8X_select_nmea_messages(NEOM8X_NMEA_ZDA_MASK);
+        status = _NEOM8X_select_nmea_messages(0b1 << NEOM8X_NMEA_MESSAGE_INDEX_ZDA);
         if (status != NEOM8X_SUCCESS) goto errors;
         break;
 #endif
@@ -723,7 +771,7 @@ NEOM8X_status_t NEOM8X_start_acquisition(NEOM8X_acquisition_t* acquisition) {
         // Reset structure.
         _NEOM8X_reset_position(&(neom8x_ctx.gps_position));
         // Select GGA message to get complete position.
-        status = _NEOM8X_select_nmea_messages(NEOM8X_NMEA_GGA_MASK);
+        status = _NEOM8X_select_nmea_messages(0b1 << NEOM8X_NMEA_MESSAGE_INDEX_GGA);
         if (status != NEOM8X_SUCCESS) goto errors;
         break;
 #endif
@@ -899,17 +947,30 @@ NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* timepulse
     // Local variables.
     NEOM8X_status_t status = NEOM8X_SUCCESS;
     uint64_t pulse_length_ratio = 0;
-    // See p.222 for NEOM8X message format.
-    uint8_t neom8x_cfg_tp5[NEOM8X_MSG_OVERHEAD_SIZE + NEOM8X_CFG_TP5_PAYLOAD_SIZE] = { 0xB5, 0x62, 0x06, 0x31, 0x20, 0x00, // Header.
-        0x00, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // Payload.
-        0, 0 // Checksum.
+    // See p.221 for UBX message format.
+    uint8_t ubx_cfg_tp5[NEOM8X_UBX_MSG_OVERHEAD_SIZE_BYTES + NEOM8X_UBX_CFG_TP5_PAYLOAD_SIZE_BYTES] = {
+        0xB5, 0x62,                             // Preamble.
+        0x06, 0x31,                             // UBX message class and ID.
+        NEOM8X_UBX_CFG_TP5_PAYLOAD_SIZE_BYTES, 0x00,  // Length.
+        0,                                      // Timepulse index.
+        0x01,                                   // Version.
+        0x00, 0x00,                             // Reserved.
+        0, 0,                                   // Antenna cable delay.
+        0, 0,                                   // RF group delay.
+        0, 0, 0, 0,                             // Frequency or period.
+        0, 0, 0, 0,                             // Frequency or period locked.
+        0, 0, 0, 0,                             // Pulse length or duty cycle.
+        0, 0, 0, 0,                             // Pulse length or duty cycle locked.
+        0, 0, 0, 0,                             // Delay.
+        0x00, 0x00, 0x00, 0x00,                 // Flags.
+        0x00, 0x00                              // UBX checksum.
     };
     // Check parameters.
     if (timepulse_config == NULL) {
         status = NEOM8X_ERROR_NULL_PARAMETER;
         goto errors;
     }
-    if ((timepulse_config->frequency_hz) > NEOM8X_TIMEPULSE_FREQUENCY_MAX_HZ) {
+    if ((timepulse_config->frequency_hz) > NEOM8X_TIMEPULSE_FREQUENCY_HZ_MAX) {
         status = NEOM8X_ERROR_TIMEPULSE_FREQUENCY;
         goto errors;
     }
@@ -918,23 +979,23 @@ NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* timepulse
         goto errors;
     }
     // Frequency
-    neom8x_cfg_tp5[14] = (uint8_t) (((timepulse_config->frequency_hz) >> 0) & MATH_U8_MASK);
-    neom8x_cfg_tp5[15] = (uint8_t) (((timepulse_config->frequency_hz) >> 8) & MATH_U8_MASK);
-    neom8x_cfg_tp5[16] = (uint8_t) (((timepulse_config->frequency_hz) >> 16) & MATH_U8_MASK);
-    neom8x_cfg_tp5[17] = (uint8_t) (((timepulse_config->frequency_hz) >> 24) & MATH_U8_MASK);
+    ubx_cfg_tp5[14] = (uint8_t) ((timepulse_config->frequency_hz) >> 0);
+    ubx_cfg_tp5[15] = (uint8_t) ((timepulse_config->frequency_hz) >> 8);
+    ubx_cfg_tp5[16] = (uint8_t) ((timepulse_config->frequency_hz) >> 16);
+    ubx_cfg_tp5[17] = (uint8_t) ((timepulse_config->frequency_hz) >> 24);
     // Pulse length radio.
     pulse_length_ratio = ((uint64_t) (timepulse_config->duty_cycle_percent)) * ((uint64_t) (MATH_U32_MAX));
     pulse_length_ratio /= 100;
-    neom8x_cfg_tp5[22] = (uint8_t) ((pulse_length_ratio >> 0) & MATH_U8_MASK);
-    neom8x_cfg_tp5[23] = (uint8_t) ((pulse_length_ratio >> 8) & MATH_U8_MASK);
-    neom8x_cfg_tp5[24] = (uint8_t) ((pulse_length_ratio >> 16) & MATH_U8_MASK);
-    neom8x_cfg_tp5[25] = (uint8_t) ((pulse_length_ratio >> 24) & MATH_U8_MASK);
+    ubx_cfg_tp5[22] = (uint8_t) (pulse_length_ratio >> 0);
+    ubx_cfg_tp5[23] = (uint8_t) (pulse_length_ratio >> 8);
+    ubx_cfg_tp5[24] = (uint8_t) (pulse_length_ratio >> 16);
+    ubx_cfg_tp5[25] = (uint8_t) (pulse_length_ratio >> 24);
     // Flags.
-    neom8x_cfg_tp5[34] = ((timepulse_config->active) == 0) ? 0x4A : 0x4B;
+    ubx_cfg_tp5[34] = ((timepulse_config->active) == 0) ? 0x4A : 0x4B;
     // Compute checksum.
-    _NEOM8X_compute_ubx_checksum(neom8x_cfg_tp5, NEOM8X_CFG_TP5_PAYLOAD_SIZE);
+    _NEOM8X_compute_ubx_checksum(ubx_cfg_tp5, NEOM8X_UBX_CFG_TP5_PAYLOAD_SIZE_BYTES);
     // Send message.
-    status = NEOM8X_HW_send_message(neom8x_cfg_tp5, (NEOM8X_MSG_OVERHEAD_SIZE + NEOM8X_CFG_TP5_PAYLOAD_SIZE));
+    status = NEOM8X_HW_send_message(ubx_cfg_tp5, (NEOM8X_UBX_MSG_OVERHEAD_SIZE_BYTES + NEOM8X_UBX_CFG_TP5_PAYLOAD_SIZE_BYTES));
     if (status != NEOM8X_SUCCESS) goto errors;
 errors:
     return status;

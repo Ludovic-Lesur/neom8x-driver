@@ -30,7 +30,7 @@ if(${BUILD_MODE} STREQUAL STATIC)
     endmacro()
     
     # Compilation flags.
-    add_compilation_flag(NEOM8X_DRIVERS_DISABLE "Disable the NEOM8X driver." OFF)
+    add_compilation_flag(NEOM8X_DRIVER_DISABLE "Disable the NEO-M8x driver." OFF)
     add_compilation_flag(NEOM8X_DRIVER_GPIO_ERROR_BASE_LAST "Last error base of the low level GPIO driver." 0)
     add_compilation_flag(NEOM8X_DRIVER_UART_ERROR_BASE_LAST "Last error base of the low level UART driver." 0)
     add_compilation_flag(NEOM8X_DRIVER_DELAY_ERROR_BASE_LAST "Last error base of the low level delay driver." 0)
