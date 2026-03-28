@@ -15,6 +15,10 @@
 #include "strings.h"
 #include "types.h"
 
+/*** NEOM8X macros ***/
+
+#define NEOM8X_BOOT_TIME_MS     1600
+
 /*** NEOM8X structures ***/
 
 /*!******************************************************************

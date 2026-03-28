@@ -654,12 +654,12 @@ static NEOM8X_status_t _NEOM8X_select_nmea_messages(uint32_t nmea_message_id_mas
     };
     // See p.174 for UBX message format.
     uint8_t ubx_cfg_msg[NEOM8X_UBX_MSG_OVERHEAD_SIZE_BYTES + NEOM8X_UBX_CFG_MSG_PAYLOAD_SIZE_BYTES] = {
-        0xB5, 0x62,                             // Preamble.
-        0x06, 0x01,                             // UBX message class and ID.
+        0xB5, 0x62,                                   // Preamble.
+        0x06, 0x01,                                   // UBX message class and ID.
         NEOM8X_UBX_CFG_MSG_PAYLOAD_SIZE_BYTES, 0x00,  // Length.
-        0xF0, 0x00,                             // NMEA message class and ID.
-        0, 0, 0, 0, 0, 0,                       // Message rate on each port.
-        0x00, 0x00                              // UBX checksum.
+        0xF0, 0x00,                                   // NMEA message class and ID.
+        0, 0, 0, 0, 0, 0,                             // Message rate on each port.
+        0x00, 0x00                                    // UBX checksum.
     };
     uint8_t nmea_idx = 0;
     uint8_t idx = 0;
@@ -949,21 +949,21 @@ NEOM8X_status_t NEOM8X_set_timepulse(NEOM8X_timepulse_configuration_t* timepulse
     uint64_t pulse_length_ratio = 0;
     // See p.221 for UBX message format.
     uint8_t ubx_cfg_tp5[NEOM8X_UBX_MSG_OVERHEAD_SIZE_BYTES + NEOM8X_UBX_CFG_TP5_PAYLOAD_SIZE_BYTES] = {
-        0xB5, 0x62,                             // Preamble.
-        0x06, 0x31,                             // UBX message class and ID.
+        0xB5, 0x62,                                   // Preamble.
+        0x06, 0x31,                                   // UBX message class and ID.
         NEOM8X_UBX_CFG_TP5_PAYLOAD_SIZE_BYTES, 0x00,  // Length.
-        0,                                      // Timepulse index.
-        0x01,                                   // Version.
-        0x00, 0x00,                             // Reserved.
-        0, 0,                                   // Antenna cable delay.
-        0, 0,                                   // RF group delay.
-        0, 0, 0, 0,                             // Frequency or period.
-        0, 0, 0, 0,                             // Frequency or period locked.
-        0, 0, 0, 0,                             // Pulse length or duty cycle.
-        0, 0, 0, 0,                             // Pulse length or duty cycle locked.
-        0, 0, 0, 0,                             // Delay.
-        0x00, 0x00, 0x00, 0x00,                 // Flags.
-        0x00, 0x00                              // UBX checksum.
+        0,                                            // Timepulse index.
+        0x01,                                         // Version.
+        0x00, 0x00,                                   // Reserved.
+        0, 0,                                         // Antenna cable delay.
+        0, 0,                                         // RF group delay.
+        0, 0, 0, 0,                                   // Frequency or period.
+        0, 0, 0, 0,                                   // Frequency or period locked.
+        0, 0, 0, 0,                                   // Pulse length or duty cycle.
+        0, 0, 0, 0,                                   // Pulse length or duty cycle locked.
+        0, 0, 0, 0,                                   // Delay.
+        0x00, 0x00, 0x00, 0x00,                       // Flags.
+        0x00, 0x00                                    // UBX checksum.
     };
     // Check parameters.
     if (timepulse_config == NULL) {
