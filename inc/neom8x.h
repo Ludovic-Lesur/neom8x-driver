@@ -63,6 +63,7 @@ typedef enum {
  * \brief NEOM8X data list.
  *******************************************************************/
 typedef enum {
+    NEOM8X_GPS_DATA_NONE = 0,
 #ifdef NEOM8X_DRIVER_GPS_DATA_TIME
     NEOM8X_GPS_DATA_TIME,
 #endif

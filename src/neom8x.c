@@ -701,7 +701,7 @@ NEOM8X_status_t NEOM8X_init(void) {
     neom8x_ctx.nmea_buffer_idx_write = 0;
     neom8x_ctx.nmea_buffer_idx_ready = 0;
     neom8x_ctx.nmea_frame_received_flag = 0;
-    neom8x_ctx.acquisition.gps_data = NEOM8X_GPS_DATA_LAST;
+    neom8x_ctx.acquisition.gps_data = NEOM8X_GPS_DATA_NONE;
     neom8x_ctx.acquisition.process_callback = NULL;
     neom8x_ctx.acquisition.completion_callback = NULL;
     // Init hardware interface.
@@ -729,7 +729,7 @@ NEOM8X_status_t NEOM8X_start_acquisition(NEOM8X_acquisition_t* acquisition) {
     // Local variables.
     NEOM8X_status_t status = NEOM8X_SUCCESS;
     // Check state.
-    if (neom8x_ctx.acquisition.gps_data != NEOM8X_GPS_DATA_LAST) {
+    if (neom8x_ctx.acquisition.gps_data != NEOM8X_GPS_DATA_NONE) {
         status = NEOM8X_ERROR_ACQUISITION_RUNNING;
         goto errors;
     }
@@ -791,7 +791,7 @@ NEOM8X_status_t NEOM8X_stop_acquisition(void) {
     // Local variables.
     NEOM8X_status_t status = NEOM8X_SUCCESS;
     // Release driver.
-    neom8x_ctx.acquisition.gps_data = NEOM8X_GPS_DATA_LAST;
+    neom8x_ctx.acquisition.gps_data = NEOM8X_GPS_DATA_NONE;
     // Stop NMEA frames reception.
     status = NEOM8X_HW_stop_rx();
     if (status != NEOM8X_SUCCESS) goto errors;
